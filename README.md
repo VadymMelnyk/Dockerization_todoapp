@@ -1,51 +1,209 @@
-# Django-Todolist
+# Dockerized Todo App
 
-Django-Todolist is a todolist web application with the most basic features of most web apps, i.e. accounts/login, API and (somewhat) interactive UI.
+A Django-based Todo List application containerized with Docker and
+Docker Compose. The project demonstrates how to package a web
+application and its database into separate containers and run them
+together in an isolated environment.
 
----
-CSS | [Skeleton](http://getskeleton.com/)
-JS  | [jQuery](https://jquery.com/)
+## Overview
 
-## Explore
-Try it out by installing the requirements. (Works only with python >= 3.8, due to Django 4)
+The application consists of two main services:
 
-    pip install -r requirements.txt
+-   **Python Application** --- runs the Django Todo List application.
+-   **MySQL Database** --- stores application data in a dedicated
+    database container.
 
-Create a database schema:
+Docker Compose is used to define and manage both services, their
+network, port mappings, and persistent database storage.
 
-    python manage.py migrate
+## Technologies Used
 
-And then start the server (default: http://localhost:8000)
+-   **Python 3.8**
+-   **Django**
+-   **Docker**
+-   **Docker Compose**
+-   **MySQL**
+-   **Linux**
 
-    python manage.py runserver
+## Project Structure
 
+``` text
+Dockerization_todoapp/
+├── accounts/             # User account functionality
+├── api/                  # Application API
+├── lists/                # Todo list functionality
+├── todolist/             # Django project configuration
+├── .github/
+│   └── workflows/        # GitHub Actions workflows
+├── Dockerfile            # Django application image
+├── Dockerfile.mysql      # MySQL image configuration
+├── docker-compose.yml    # Multi-container configuration
+├── manage.py             # Django management utility
+├── requirements.txt      # Python dependencies
+└── README.md
+```
 
-Now you can browse the [API](http://localhost:8000/api/)
-or start on the [landing page](http://localhost:8000/)
+## Architecture
 
-## Task
-#### Prerequisites
-- Fork this repository
+The application runs using two Docker containers connected through a
+dedicated Docker network.
 
-#### Requirements
-1. pdate docker-compose to be able to set such env variables:
-    - ENGINE
-    - NAME
-    - USER
-    - PASSWORD
-    - HOST
-    - PORT
-2. Update your app to read ENV vars and set DATABASES section fields inside of todolist/settigns.py file
-3. Use semantic versioning to tag image inside the docker-compose
-4. TODO App should work as before
-5. Create PR with your changes and attach it for validation on a platform
+``` text
+              ┌──────────────────────┐
+              │       Browser        │
+              │  http://localhost:8080│
+              └──────────┬───────────┘
+                         │
+                         ▼
+              ┌──────────────────────┐
+              │    Python / Django   │
+              │      Container       │
+              │      Port: 8080      │
+              └──────────┬───────────┘
+                         │
+                         ▼
+              ┌──────────────────────┐
+              │    MySQL Database    │
+              │      Container       │
+              │      Port: 3306      │
+              └──────────┬───────────┘
+                         │
+                         ▼
+              ┌──────────────────────┐
+              │   Docker Volume      │
+              │   Persistent Data    │
+              └──────────────────────┘
+```
 
+## Getting Started
 
+### Prerequisites
 
+Make sure the following tools are installed:
 
+-   Docker
+-   Docker Compose (or Docker Compose V2)
 
+### 1. Clone the repository
 
+``` bash
+git clone https://github.com/VadymMelnyk/Dockerization_todoapp.git
+cd Dockerization_todoapp
+```
 
+### 2. Build and start the containers
 
+Run the following command:
 
+``` bash
+docker compose up --build -d
+```
 
+This command builds the application and database images and starts both
+services in detached mode.
+
+### 3. Check running containers
+
+``` bash
+docker compose ps
+```
+
+### 4. Access the application
+
+Open your browser and navigate to:
+
+``` text
+http://localhost:8080
+```
+
+### 5. View container logs
+
+To view logs from all services:
+
+``` bash
+docker compose logs -f
+```
+
+To view logs from a specific service:
+
+``` bash
+docker compose logs -f pythonapp
+```
+
+``` bash
+docker compose logs -f mysql
+```
+
+## Docker Configuration
+
+### Application Container
+
+The application Dockerfile uses a multi-stage build approach:
+
+-   Uses Python 3.8 as the base image.
+-   Sets `/app` as the working directory.
+-   Installs dependencies from `requirements.txt`.
+-   Exposes port `8080`.
+-   Runs Django database migrations before starting the application.
+
+### MySQL Container
+
+The MySQL service:
+
+-   Uses the official MySQL Docker image.
+-   Creates the application database and database user.
+-   Exposes port `3306`.
+-   Uses a named Docker volume to persist database data.
+
+### Docker Compose
+
+The `docker-compose.yml` file defines:
+
+  Service     Image                 Container Port   Host Port
+  ----------- ------------------- ---------------- -----------
+  pythonapp   todoapp:2.0.0                   8080        8080
+  mysql       mysql-local:1.0.0               3306        3306
+
+Both containers communicate through the `todoapp-net` Docker network.
+
+Database data is stored in the `todoapp-db-data` named volume.
+
+## Managing the Application
+
+Stop and remove containers:
+
+``` bash
+docker compose down
+```
+
+Stop containers and remove the persistent database volume:
+
+``` bash
+docker compose down -v
+```
+
+**Warning:** The second command permanently deletes the database volume
+and its stored data.
+
+Rebuild the application after making changes:
+
+``` bash
+docker compose up --build -d
+```
+
+## What I Practiced
+
+Through this project, I gained practical experience with:
+
+-   Writing Dockerfiles to containerize a Django application.
+-   Building custom Docker images.
+-   Running multiple services with Docker Compose.
+-   Configuring container networking.
+-   Managing persistent data with Docker volumes.
+-   Configuring a MySQL database container.
+-   Understanding container dependencies and service communication.
+
+## License
+
+This project is licensed under the MIT License. See the
+[LICENSE](LICENSE) file for details.
