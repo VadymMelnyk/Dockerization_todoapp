@@ -1,0 +1,19 @@
+name: Run Docker Compose
+on:
+  pull_request:
+    branches: [ "main" ]
+
+  workflow_dispatch:
+  
+jobs:
+
+  docker-compose:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - uses: hoverkraft-tech/compose-action@v2.0.0
+      name: Compose Up
+        
